@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory-Centric Computing Architecture | Intelligent Computation Placement</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-badge">
+                    <span class="icon">⚡</span>
+                    <span class="logo-title">MCCA-Sim</span>
+                </div>
+                <div class="header-titles">
+                    <h1>Memory-Centric Computing Architecture</h1>
+                    <p class="subtitle">Data-Local Execution & Intelligent Computation Placement Engine</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">Simulator Engine: Ready</span>
+                </div>
+                <div class="spec-badge">CXL 3.0 / HBM3 / PIM-SIMD</div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="simulator-tab" id="tab-sim-btn">
+                <span class="tab-icon">🎛️</span> Interactive Architecture & Live Simulator
+            </button>
+            <button class="tab-btn" data-tab="analysis-tab" id="tab-analysis-btn">
+                <span class="tab-icon">📊</span> Comparative Evaluation & Roofline
+            </button>
+            <button class="tab-btn" data-tab="report-tab" id="tab-report-btn">
+                <span class="tab-icon">📑</span> Architectural Specification & Theory
+            </button>
+        </nav>
+
+        <!-- TAB 1: Live Simulator & Architecture Visualizer -->
+        <main class="tab-content active" id="simulator-tab">
+            <div class="grid-layout">
+                <!-- Left Sidebar: Controls -->
+                <aside class="control-panel glass-card">
+                    <h2 class="panel-heading"><span class="icon">⚙️</span> Workload & Policy Control</h2>
+
+                    <div class="form-group">
+                        <label for="workload-select">Target Workload Dataset</label>
+                        <select id="workload-select" class="custom-select">
+                            <option value="reusable">1. Highly Reusable (Dense GEMM / Stencil)</option>
+                            <option value="streaming">2. Streaming Dataset (SAXPY & Filter)</option>
+                            <option value="random">3. Randomly Accessed (Graph BFS / SpMV)</option>
+                            <option value="mixed" selected>4. Heterogeneous Multi-Phase Pipeline</option>
+                        </select>
+                        <span class="input-hint" id="workload-hint">Multi-phase workflow interleaving Random, Streaming, and Reusable phases</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="policy-select">Computation Placement Policy</label>
+                        <select id="policy-select" class="custom-select">
+                            <option value="DYNAMIC_INTELLIGENT" selected>Dynamic Intelligent Placement (Ours)</option>
+                            <option value="ALWAYS_HOST">Always Host CPU (Baseline von Neumann)</option>
+                            <option value="ALWAYS_PIM">Always PIM (Static Near-Memory Offload)</option>
+                            <option value="ORACLE">Oracle Placement (Theoretical Optimum)</option>
+                        </select>
+                        <span class="input-hint" id="policy-hint">Cost-model evaluates operational intensity, data reuse, & bus cost dynamically</span>
+                    </div>
+
+                    <div class="form-group slider-group">
+                        <div class="slider-header">
+                            <label for="interconnect-bw">Host-Memory Bus BW (CXL)</label>
+                            <span class="slider-val" id="bw-val">64 GB/s</span>
+                        </div>
+                        <input type="range" id="interconnect-bw" min="16" max="256" step="16" value="64" class="custom-slider">
+                        <div class="slider-ticks">
+                            <span>16 GB/s</span>
+                            <span>64 GB/s</span>
+                            <span>128 GB/s</span>
+                            <span>256 GB/s</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="btn-run-sim" class="btn btn-primary">
+                            <span class="btn-icon">▶</span> Run Full Simulation
+                        </button>
+                        <button id="btn-animate-sim" class="btn btn-secondary">
+                            <span class="btn-icon">⚡</span> Step Animation
+                        </button>
+                    </div>
+
+                    <!-- Workload Metadata Card -->
+                    <div class="workload-spec-card">
+                        <h3>Active Workload Profile</h3>
+                        <div class="spec-row">
+                            <span class="spec-label">Access Pattern:</span>
+                            <span class="spec-val" id="meta-pattern">Hybrid Heterogeneous</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Operational Intensity:</span>
+                            <span class="spec-val" id="meta-intensity">Dynamic (0.2 to 16.0 FLOPs/B)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Locality / Reuse:</span>
+                            <span class="spec-val" id="meta-reuse">Multi-Tiered</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Center Area: Interactive Architecture Diagram -->
+                <section class="visualizer-panel glass-card">
+                    <div class="visualizer-header">
+                        <h2><span class="icon">🏛️</span> Architectural Subsystems & Dynamic Dataflow</h2>
+                        <div class="step-counter" id="step-info">Chunk 0 / 0 | Idle</div>
+                    </div>
+
+                    <!-- Interactive Hardware Schematic Canvas / SVG -->
+                    <div class="architecture-diagram" id="arch-diagram">
+                        <!-- Host Processor Domain -->
+                        <div class="arch-box host-box" id="host-unit">
+                            <div class="box-tag">HOST TIER</div>
+                            <div class="box-title">Conventional Host CPU</div>
+                            <div class="core-grid">
+                                <div class="mini-core active">C0</div>
+                                <div class="mini-core active">C1</div>
+                                <div class="mini-core active">C2</div>
+                                <div class="mini-core active">C3</div>
+                            </div>
+                            <div class="sub-component cache-l1">L1 / L2 Cache (Private)</div>
+                            <div class="sub-component cache-llc">Shared LLC (64 MB)</div>
+                            <div class="stat-pill">1.84 TFLOPs Peak | 3.6 GHz</div>
+                        </div>
+
+                        <!-- CXL Interconnect Bridge -->
+                        <div class="interconnect-channel" id="interconnect-link">
+                            <div class="link-label">CXL 3.0 / PCIe Link (<span id="live-bw">64</span> GB/s)</div>
+                            <div class="packet-lane" id="packet-track">
+                                <div class="data-packet" id="packet-elem"></div>
+                            </div>
+                            <div class="link-energy-badge">~18 pJ/bit external link cost</div>
+                        </div>
+
+                        <!-- Memory & PIM Subsystem -->
+                        <div class="arch-box memory-box" id="memory-unit">
+                            <div class="box-tag">MEMORY-CENTRIC TIER</div>
+                            <div class="box-title">3D-Stacked HBM3 + Logic Die</div>
+                            
+                            <!-- Logic Die PIM cores -->
+                            <div class="sub-component pim-logic-die" id="pim-logic-die">
+                                <div class="pim-tag">Logic Die (PIM SIMD Units)</div>
+                                <div class="pim-cores-row">
+                                    <span class="pim-core">P0</span>
+                                    <span class="pim-core">P1</span>
+                                    <span class="pim-core">P2</span>
+                                    <span class="pim-core">P3</span>
+                                    <span class="pim-core">P4</span>
+                                    <span class="pim-core">P5</span>
+                                </div>
+                                <div class="stat-pill pim-stat">128 GFLOPs @ 1.0 GHz | Local SRAM</div>
+                            </div>
+
+                            <!-- Internal TSV Bus -->
+                            <div class="internal-tsv-bus">
+                                <span>High-Density TSVs (1024 GB/s Aggregate BW)</span>
+                            </div>
+
+                            <!-- DRAM Banks / Vaults -->
+                            <div class="dram-vault-array">
+                                <div class="vault-block">Vault 0-3</div>
+                                <div class="vault-block">Vault 4-7</div>
+                                <div class="vault-block">Vault 8-11</div>
+                                <div class="vault-block">Vault 12-15</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-Time Decision Engine Banner -->
+                    <div class="decision-banner" id="decision-banner">
+                        <div class="decision-indicator">
+                            <span class="badge-label">Placement Decision:</span>
+                            <span class="decision-badge" id="live-decision-badge">DYNAMIC_INTELLIGENT</span>
+                        </div>
+                        <div class="decision-explanation" id="live-decision-reason">
+                            Awaiting simulation execution...
+                        </div>
+                        <div class="decision-overhead-tag" id="live-decision-overhead">
+                            OH: 250 cycles (~69 ns)
+                        </div>
+                    </div>
+
+                    <!-- Telemetry KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Total Execution Time</div>
+                            <div class="kpi-val" id="kpi-time">-- ms</div>
+                            <div class="kpi-badge speedup" id="kpi-speedup">--x Speedup</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-label">Host Interconnect Traffic</div>
+                            <div class="kpi-val" id="kpi-traffic">-- MB</div>
+                            <div class="kpi-badge traffic" id="kpi-traffic-reduc">--% Data Reduced</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-label">Total System Energy</div>
+                            <div class="kpi-val" id="kpi-energy">-- mJ</div>
+                            <div class="kpi-badge energy" id="kpi-energy-reduc">--% Energy Saved</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-label">Energy-Delay Product (EDP)</div>
+                            <div class="kpi-val" id="kpi-edp">-- J·s</div>
+                            <div class="kpi-badge edp" id="kpi-edp-reduc">--% EDP Reduced</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Bottom Row: Dynamic Charts & Trace Table -->
+            <div class="bottom-grid">
+                <!-- Energy Breakdown Chart -->
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3>Subsystem Energy Breakdown (mJ)</h3>
+                        <span class="chart-subtitle">Compute vs Interconnect vs Memory vs Overhead</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="energyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Trace Log / Decision Stream -->
+                <div class="table-card glass-card">
+                    <div class="chart-header">
+                        <h3>Dynamic Placement Execution Log</h3>
+                        <span class="chart-subtitle">Live chunk-by-chunk scheduling trace</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="trace-table" id="trace-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Phase / Kernel</th>
+                                    <th>Pattern</th>
+                                    <th>Placement</th>
+                                    <th>Latency</th>
+                                    <th>Data Transferred</th>
+                                    <th>Rationale</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trace-tbody">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">Run simulation to stream execution trace</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 2: Comparative Analysis & Publication Plots -->
+        <section class="tab-content" id="analysis-tab">
+            <div class="analysis-container">
+                <div class="section-title-box">
+                    <h2>Empirical Architecture Evaluation</h2>
+                    <p>Comparative benchmarks against Conventional von Neumann (Always-Host) and Static Near-Memory (Always-PIM)</p>
+                </div>
+
+                <div class="gallery-grid">
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 1: Speedup vs Always-Host (Log Scale)</h3>
+                        <p class="figure-desc">Dynamic Intelligent Placement matches or exceeds the best specialized resource for every workload.</p>
+                        <img src="/results/speedup_comparison.png" alt="Speedup Comparison" class="figure-img">
+                    </div>
+
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 2: Host Bus Data Movement Reduction (MB)</h3>
+                        <p class="figure-desc">Eliminating unnecessary transfers reduces CXL bus traffic by up to 98% in streaming/random access.</p>
+                        <img src="/results/data_movement_reduction.png" alt="Data Movement Reduction" class="figure-img">
+                    </div>
+
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 3: Subsystem Energy Breakdown</h3>
+                        <p class="figure-desc">Eliminating off-chip I/O transfer energy saves 85-92% total energy in memory-bound kernels.</p>
+                        <img src="/results/energy_breakdown.png" alt="Energy Breakdown" class="figure-img">
+                    </div>
+
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 4: Interconnect Bandwidth Sensitivity</h3>
+                        <p class="figure-desc">Host CPU stalls heavily when interconnect bandwidth shrinks; PIM execution remains unaffected.</p>
+                        <img src="/results/interconnect_sensitivity.png" alt="Interconnect Sensitivity" class="figure-img">
+                    </div>
+
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 5: Roofline Placement Model</h3>
+                        <p class="figure-desc">Theoretical boundary: PIM wins below ~4 FLOPs/byte; Host CPU cache wins above ~8 FLOPs/byte.</p>
+                        <img src="/results/roofline_placement.png" alt="Roofline Placement Model" class="figure-img">
+                    </div>
+
+                    <div class="gallery-card glass-card">
+                        <h3>Figure 6: Mixed Pipeline Execution Timeline</h3>
+                        <p class="figure-desc">Dynamic phase-by-phase adaptation switching between PIM and Host on the fly.</p>
+                        <img src="/results/dynamic_timeline.png" alt="Dynamic Timeline" class="figure-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Architecture Specification & Report -->
+        <section class="tab-content" id="report-tab">
+            <article class="report-container glass-card">
+                <h2>1. Architectural Overview & Problem Formulation</h2>
+                <p>
+                    Modern computing is dominated by the <strong>Memory Wall</strong> and the <strong>Data Movement Bottleneck</strong>. In conventional von Neumann architectures, all data must be shuttled over power-hungry, high-latency off-chip interconnects (such as PCIe or CXL) to the CPU/GPU, even when operations perform very few arithmetic calculations per byte.
+                </p>
+                <div class="callout callout-info">
+                    <strong>Core Thesis:</strong> A memory-centric computing architecture must dynamically decide where computation takes place—placing data-intensive, low-reuse tasks directly into 3D-stacked memory logic dies (PIM), while routing compute-intensive, highly reusable kernels to high-performance conventional host cores.
+                </div>
+
+                <h2>2. Mathematical Placement Formulation & Online Cost Model</h2>
+                <p>
+                    For each computational chunk $C$, the runtime decision engine evaluates the operational intensity $I_{op} = \frac{\text{FLOPs}}{\text{Bytes}}$, data reuse factor $\rho_{reuse}$, access pattern $P_{access}$, and current data residency $\text{Loc}$:
+                </p>
+                <div class="math-box">
+                    $$\text{Cost}_{Host} = T_{xfer}(N_{bytes}, \text{BW}_{CXL}) + T_{compute}(N_{flops}, \text{Peak}_{Host}) + T_{cache\_miss}(\rho_{reuse}, P_{access})$$
+                    $$\text{Cost}_{PIM} = T_{bank\_lat} + \max\left(\frac{N_{flops}}{\text{Peak}_{PIM}}, \frac{N_{bytes}}{\text{BW}_{TSV}}\right) + T_{sync}$$
+                </div>
+                <p>
+                    Dynamic dispatch selects $\arg\min(\text{EDP}_{Host}, \text{EDP}_{PIM})$ with a hysteresis margin $\theta = 1.15$ to prevent switching oscillation. Microarchitectural overhead is explicitly accounted for: $T_{decision} = 250 \text{ cycles} \approx 69.4 \text{ ns}$ and $E_{decision} = 850 \text{ pJ}$.
+                </p>
+
+                <h2>3. Key Workload Characterization</h2>
+                <div class="table-container">
+                    <table class="spec-table">
+                        <thead>
+                            <tr>
+                                <th>Workload Dataset</th>
+                                <th>Operational Intensity</th>
+                                <th>Reuse Factor</th>
+                                <th>Access Pattern</th>
+                                <th>Optimal Placement</th>
+                                <th>Dynamic Speedup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. Highly Reusable (Dense GEMM)</strong></td>
+                                <td>High (&gt; 16 FLOPs/B)</td>
+                                <td>High (&gt; 64x)</td>
+                                <td>Tiled / Spatial</td>
+                                <td><span class="tag-host">Host CPU</span></td>
+                                <td>1.0x (PIM is 10x slower)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. Streaming Dataset (SAXPY Filter)</strong></td>
+                                <td>Low (0.25 - 0.5 FLOPs/B)</td>
+                                <td>Single-pass (1.0x)</td>
+                                <td>Sequential Stream</td>
+                                <td><span class="tag-pim">PIM Units</span></td>
+                                <td>6.66x (92.8% energy reduction)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3. Randomly Accessed (Graph BFS)</strong></td>
+                                <td>Very Low (&lt; 0.2 FLOPs/B)</td>
+                                <td>Poor (&lt; 0.2x)</td>
+                                <td>Irregular Pointer Chasing</td>
+                                <td><span class="tag-pim">PIM Units</span></td>
+                                <td>14.68x (91.2% energy reduction)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>4. Heterogeneous Mixed Pipeline</strong></td>
+                                <td>Varies (0.2 - 16.0 FLOPs/B)</td>
+                                <td>Phase-dependent</td>
+                                <td>Multi-Phase</td>
+                                <td><span class="tag-hybrid">Dynamic Adaptive</span></td>
+                                <td>6.28x over Host (87.7% energy reduction)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>4. Hardware Feasibility and Overheads</h2>
+                <p>
+                    Dynamic placement is realized via a lightweight hardware scheduler in the Host Memory Controller / CXL Root Complex:
+                </p>
+                <ul>
+                    <li><strong>Decision Latency:</strong> 250 clock cycles (~69.4 ns @ 3.6 GHz), representing &lt; 0.5% of total task runtime in real-world workloads.</li>
+                    <li><strong>Energy Overhead:</strong> 850 pJ per evaluation (&lt; 0.05% of workload energy).</li>
+                    <li><strong>Coherence & Consistency:</strong> Coarse-grained chunk-level barrier and flit-based invalidations keep caches coherent without hardware complexity.</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Computer Architecture Research Project | Memory-Centric Computing & Intelligent Computation Placement</p>
+            <p class="copyright">Built with Cycle-Accurate Multi-Subsystem Architectural Simulation</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
