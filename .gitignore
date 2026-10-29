@@ -30,17 +30,40 @@ MANIFEST
 venv/
 env/
 ENV/
-.venv
+.venv/
+.venv*/
 
-# IDE files
+# IDE / Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-workspace
+*.sublime-project
 
-# OS files
+# OS temporary and metadata files
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# Microsoft Office temporary / lock files
+~$*
+~$*.docx
+~$*.doc
+*.tmp
+
+# Submission folders and archives (deliverables submitted separately)
+CA assignment/
+CA assignment.zip
+CA assigment/
+CA assigment.zip
+submittion/
+submittion.zip
+submission/
+submission.zip
+*.zip
+*.tar.gz
+*.rar
+*.7z
