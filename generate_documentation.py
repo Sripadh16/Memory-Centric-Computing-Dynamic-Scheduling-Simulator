@@ -412,7 +412,8 @@ def build_full_documentation(output_path):
             "conventional Host-centric execution against 3D-stacked Processing-In-Memory (PIM). Central to this work is the "
             "Intelligent Dynamic Computation Placement (IDCP) engine, which evaluates runtime cache residency, bus queuing, "
             "and operational intensity to autonomously place tasks. Across realistic workloads, MemCentric-Sim demonstrates "
-            "4.09×–26.35× speedup and up to 11.58× energy savings, while maintaining microarchitectural scheduling overhead "
+            "7.97×–12.63× speedup on memory-bound workloads (scaling up to 26.35× under narrow interconnects; 6.61× on mixed pipelines) "
+            "and up to 13.82× energy savings (92.8% reduction), while maintaining microarchitectural scheduling overhead "
             "strictly under 0.5%."
         ),
         border_color=HEX_PRIMARY_NAVY,
@@ -822,7 +823,7 @@ def build_full_documentation(output_path):
         "Figure 5.6 tracks the step-by-step dispatch decisions across the Mixed Heterogeneous Pipeline. The pipeline shifts from an initial "
         "Random Graph Filter (placed on PIM) to a Streaming Scale (placed on PIM), enters a Dense GEMM stage (immediately switched to the Host CPU), "
         "and finishes with a Streaming Reduction (routed back to PIM). DYNAMIC_INTELLIGENT executes the entire composite workload in 0.12 ms "
-        "(6.61× faster than Host, and 3.4× faster than static Always-PIM)."
+        "(6.61× faster than Host, and 3.5× faster than static Always-PIM)."
     )
     add_figure_with_caption(
         doc,
@@ -857,8 +858,8 @@ def build_full_documentation(output_path):
         ("test_three_level_cache_hierarchy", "Verifies cascading accesses across L1, L2, and Shared L3 LLC, ensuring LLC misses pull data into upper tiers."),
         ("test_multibank_dram_timing", "Validates row-buffer hit rates (>70%) and verifies row-buffer conflict penalties (tRP + tRCD + tCAS)."),
         ("test_reusable_workload_placement", "Confirms that the dynamic engine correctly places high-reuse GEMM tasks on the Host CPU rather than PIM."),
-        ("test_streaming_workload_speedup", "Enforces that Streaming SAXPY offloading achieves at least a 4.09× speedup over the Host baseline."),
-        ("test_random_graph_workload_energy_savings", "Verifies that irregular graph workloads achieve 10× to 14× (up to 11.58×) energy reduction."),
+        ("test_streaming_workload_speedup", "Enforces that Streaming SAXPY offloading achieves high speedup over the Host baseline (≥7.0×, reaching 7.97× on full benchmarks)."),
+        ("test_random_graph_workload_energy_savings", "Verifies that irregular graph workloads achieve 10× to 14× (specifically 11.37×) energy reduction."),
         ("test_scheduling_overhead", "Strictly asserts that runtime decision overhead accounts for less than 0.5% of total execution time.")
     ]
     for name, desc in test_cases:
@@ -881,7 +882,7 @@ def build_full_documentation(output_path):
         title="Key Architectural Takeaways",
         text=(
             "1. Static Offloading Fails: Offloading compute-bound code to PIM incurs an 11× slowdown due to limited near-memory ALUs.\n"
-            "2. Memory-Bound Offloading Excels: PIM delivers 7.97× to 26.35× speedup and slashes off-chip energy by up to 11.58×.\n"
+            "2. Memory-Bound Offloading Excels: PIM delivers 7.97× to 26.35× speedup and slashes off-chip energy by up to 13.82× (11.37× on random graphs).\n"
             "3. Dynamic Adaptation is Feasible: With an amortized phase predictor, hardware placement overhead is strictly under 0.5%.\n"
             "4. Post-von Neumann Viability: Intelligent hybrid architectures provide the optimal path forward for post-DDR5/HBM3 systems."
         ),

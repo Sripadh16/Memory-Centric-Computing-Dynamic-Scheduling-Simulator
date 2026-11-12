@@ -307,28 +307,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (params.policy === "ALWAYS_PIM") {
             isPim = true;
-            if (isReusable) { speedup = 0.10; timeMs = 2.75; energyMj = 5.8; trafficMb = 29.0; }
-            else if (isStreaming) { speedup = 6.66; timeMs = 0.10; energyMj = 0.44; trafficMb = 0.0; }
-            else if (isRandom) { speedup = 14.68; timeMs = 0.08; energyMj = 0.76; trafficMb = 1.0; }
-            else { speedup = 1.83; timeMs = 0.41; energyMj = 1.12; trafficMb = 3.6; }
+            if (isReusable) { speedup = 0.09; timeMs = 2.73; energyMj = 5.82; trafficMb = 29.0; }
+            else if (isStreaming) { speedup = 7.97; timeMs = 0.10; energyMj = 0.44; trafficMb = 0.0; }
+            else if (isRandom) { speedup = 12.63; timeMs = 0.08; energyMj = 0.76; trafficMb = 1.0; }
+            else { speedup = 1.87; timeMs = 0.41; energyMj = 1.12; trafficMb = 3.6; }
         } else if (params.policy === "DYNAMIC_INTELLIGENT" || params.policy === "ORACLE") {
             if (isReusable) {
-                isPim = false; speedup = 1.0; timeMs = 0.28; energyMj = 1.64; trafficMb = 3.0;
+                isPim = false; speedup = 1.0; timeMs = 0.25; energyMj = 1.64; trafficMb = 3.0;
             } else if (isStreaming) {
-                isPim = true; speedup = 6.66; timeMs = 0.10; energyMj = 0.44; trafficMb = 0.0;
+                isPim = true; speedup = 7.97; timeMs = 0.10; energyMj = 0.44; trafficMb = 0.0;
             } else if (isRandom) {
-                isPim = true; speedup = 14.68; timeMs = 0.08; energyMj = 0.76; trafficMb = 1.0;
+                isPim = true; speedup = 12.63; timeMs = 0.08; energyMj = 0.76; trafficMb = 1.0;
             } else {
-                isPim = true; speedup = 6.28; timeMs = 0.12; energyMj = 0.73; trafficMb = 1.1;
+                isPim = true; speedup = 6.61; timeMs = 0.12; energyMj = 0.73; trafficMb = 1.1;
             }
         } else {
             // ALWAYS_HOST
             isPim = false;
             speedup = 1.0;
-            if (isReusable) { timeMs = 0.28; energyMj = 1.64; trafficMb = 3.0; }
-            else if (isStreaming) { timeMs = 0.69; energyMj = 6.10; trafficMb = 32.0; }
-            else if (isRandom) { timeMs = 1.20; energyMj = 8.65; trafficMb = 45.8; }
-            else { timeMs = 0.76; energyMj = 5.95; trafficMb = 30.7; }
+            if (isReusable) { timeMs = 0.25; energyMj = 1.64; trafficMb = 3.0; }
+            else if (isStreaming) { timeMs = 0.81; energyMj = 6.08; trafficMb = 32.0; }
+            else if (isRandom) { timeMs = 1.03; energyMj = 8.64; trafficMb = 45.8; }
+            else { timeMs = 0.77; energyMj = 5.94; trafficMb = 30.7; }
         }
 
         const metrics = {

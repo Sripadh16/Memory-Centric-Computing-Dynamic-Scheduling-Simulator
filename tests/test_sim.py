@@ -4,7 +4,7 @@ Verifies:
 1. 3-Level Set-Associative Caches (L1-L3, LRU)
 2. Multi-Bank DRAM Row-Buffer Timing (tCAS, tRCD, tRP)
 3. Dynamic and Static Scheduling
-4. Performance and EDP Evaluation (4.09x - 26.35x speedup, up to 11.58x energy savings, <0.5% overhead)
+4. Performance and EDP Evaluation (7.97x - 12.63x speedup, up to 26.35x under narrow interconnect; up to 13.82x energy savings, <0.5% overhead)
 """
 
 import unittest
@@ -83,7 +83,7 @@ class TestMemCentricSimulator(unittest.TestCase):
         pim_metrics = self.engine.run_workload(stream_chunks, policy=PlacementPolicy.DYNAMIC_INTELLIGENT)
 
         speedup = host_metrics.total_execution_time_ns / pim_metrics.total_execution_time_ns
-        self.assertGreaterEqual(speedup, 4.09) # Matches resume bullet: 4.09x - 26.35x speedup
+        self.assertGreaterEqual(speedup, 7.0) # Matches streaming speedup range (7.97x on full benchmark)
 
     def test_random_graph_workload_energy_savings(self):
         graph_chunks = WorkloadGenerator.create_graph_bfs_spmv(num_nodes=50_000, edges_per_node=16, chunk_nodes=10_000)
@@ -91,7 +91,7 @@ class TestMemCentricSimulator(unittest.TestCase):
         pim_metrics = self.engine.run_workload(graph_chunks, policy=PlacementPolicy.DYNAMIC_INTELLIGENT)
 
         energy_savings_mult = host_metrics.total_energy_uj / pim_metrics.total_energy_uj
-        # Verify energy savings reaches up to 11.58x (91.36% savings)
+        # Verify energy savings reaches 11.37x - 13.82x (>91% savings)
         self.assertGreaterEqual(energy_savings_mult, 10.0)
         self.assertLessEqual(energy_savings_mult, 14.0)
 

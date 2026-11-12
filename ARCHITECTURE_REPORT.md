@@ -178,7 +178,7 @@ Simulations were executed across all 4 workloads and all 4 placement policies:
 | | `ORACLE` | 0.10 | 7.97x | 0.0 | 0.44 | 13.82x | 44.0 | 0.00% |
 | **3. Random (Graph BFS)** | `ALWAYS_HOST` | 1.03 | 1.00x | 45.8 | 8.64 | Baseline (1.00x) | 8,899.2 | 0.00% |
 | | `ALWAYS_PIM` | **0.08** | **12.63x** | **1.0** | **0.76** | **11.37x** | **60.8** | 0.00% |
-| | `DYNAMIC_INTELLIGENT` | **0.08** | **12.63x** *(up to 26.35x)* | **1.0** | **0.76** | **up to 11.58x** | **60.8** | **0.05%** |
+| | `DYNAMIC_INTELLIGENT` | **0.08** | **12.63x** *(up to 26.35x)* | **1.0** | **0.76** | **11.37x** | **60.8** | **0.05%** |
 | | `ORACLE` | 0.08 | 12.63x | 1.0 | 0.76 | 11.37x | 60.8 | 0.00% |
 | **4. Mixed Pipeline** | `ALWAYS_HOST` | 0.77 | 1.00x | 30.7 | 5.94 | Baseline (1.00x) | 4,573.8 | 0.00% |
 | | `ALWAYS_PIM` | 0.41 | 1.87x | 3.6 | 1.12 | 5.30x | 459.2 | 0.00% |
@@ -191,19 +191,19 @@ Simulations were executed across all 4 workloads and all 4 placement policies:
 
 ### 5.1 Why Naive Offloading Fails on Reusable Data
 On the **Dense GEMM** workload, static near-memory offloading (`ALWAYS_PIM`) is a disaster:
-- It suffers a **10x slowdown** (2.75 ms vs 0.28 ms) and consumes **3.5x more energy** (5.82 mJ vs 1.64 mJ).
+- It suffers an **11.0x slowdown** (2.73 ms vs 0.25 ms) and consumes **3.55x more energy** (5.82 mJ vs 1.64 mJ).
 - *Root Cause:* In dense matrix multiply, each element loaded into cache is reused dozens of times ($O(N^3)$ compute on $O(N^2)$ data). Host CPU vector pipelines deliver **1843.2 GFLOPs**, easily eclipsing PIM’s modest **128 GFLOPs**. The CXL bus transfer overhead is amortized over millions of operations.
-- *MCCA Behavior:* The IDCP engine immediately detects high operational intensity ($I_{op} > 16.0$) and high cache reuse ($\rho_{reuse} > 10.0$), placing 100% of the GEMM workload on the Host CPU, achieving optimal 0.28 ms performance without manual tuning.
+- *MCCA Behavior:* The IDCP engine immediately detects high operational intensity ($I_{op} > 16.0$) and high cache reuse ($\rho_{reuse} > 10.0$), placing 100% of the GEMM workload on the Host CPU, achieving optimal 0.25 ms performance without manual tuning.
 
 ### 5.2 Dramatic Wins on Streaming and Irregular Access
-- **Streaming SAXPY:** Yields a **6.66x speedup** and **92.8% energy reduction**. Host bus traffic drops from **32.0 MB to 0 MB**. The Host CPU spends over 80% of its time stalled on CXL bus serialization, whereas PIM reads directly from DRAM banks over 1024 GB/s internal TSVs.
-- **Random Graph BFS:** Yields a **14.68x speedup** and **91.2% energy reduction**. Host bus traffic drops from **45.8 MB to 1.0 MB** (a 97.8% traffic reduction). In traditional host execution, random pointer chasing causes extreme cache-line amplification (fetching 64 bytes over the bus to inspect a 4-byte pointer). In MCCA, the PIM units execute adjacent to the DRAM banks, eliminating bus-line amplification entirely.
+- **Streaming SAXPY:** Yields a **7.97x speedup** and **92.8% energy reduction** (a **13.82x energy savings multiplier**, reducing energy from 6.08 mJ to 0.44 mJ). Host bus traffic drops from **32.0 MB to 0.0 MB** (100% reduction). The Host CPU spends over 80% of its time stalled on CXL bus serialization, whereas PIM reads directly from DRAM banks over 1024 GB/s internal TSVs.
+- **Random Graph BFS:** Yields a **12.63x speedup** (scaling up to **26.35x** under narrow 16 GB/s interconnect) and **91.2% energy reduction** (an **11.37x energy savings multiplier**, reducing energy from 8.64 mJ to 0.76 mJ). Host bus traffic drops from **45.8 MB to 1.0 MB** (a 97.8% traffic reduction). In traditional host execution, random pointer chasing causes extreme cache-line amplification (fetching 64 bytes over the bus to inspect a 4-byte pointer). In MCCA, the PIM units execute adjacent to the DRAM banks, eliminating bus-line amplification entirely.
 
 ### 5.3 The Mixed Heterogeneous Pipeline: True Power of MCCA
 The composite pipeline illustrates the real-world utility of MCCA:
-- `ALWAYS_HOST` requires 0.76 ms.
+- `ALWAYS_HOST` requires 0.77 ms (5.94 mJ).
 - `ALWAYS_PIM` requires 0.41 ms (slowed down severely during the Dense GEMM phase).
-- `DYNAMIC_INTELLIGENT` achieves **0.12 ms (6.28x faster than Host, 3.4x faster than Always-PIM)**!
+- `DYNAMIC_INTELLIGENT` achieves **0.12 ms (6.61x faster than Host, 3.5x faster than Always-PIM)** with **8.14x energy savings** (0.73 mJ vs 5.94 mJ)!
 - *Mechanism:* MCCA places the Random Graph and Streaming phases onto the PIM units (saving bus bandwidth and energy), and then dynamically routes the Dense GEMM phase to the Host CPU cores (leveraging 1.84 TFLOPs vector units). This dynamic adaptation achieves superior EDP ($87.6\ \mu\text{J}\cdot\text{s}$) than any static architecture could ever attain.
 
 ### 5.4 Feasibility and Overhead of Dynamic Decision-Making
@@ -213,8 +213,8 @@ The composite pipeline illustrates the real-world utility of MCCA:
 
 ### 5.5 Interconnect Sensitivity Insights
 When sweeping interconnect bandwidth from 16 GB/s to 256 GB/s:
-- Host CPU performance on streaming kernels drops dramatically from 0.28 ms at 256 GB/s down to 2.45 ms at 16 GB/s (an 8.7x slowdown).
-- In contrast, MCCA PIM execution remains completely flat at 0.10 ms regardless of external bus bandwidth, because memory accesses never traverse the external pins.
+- Host CPU execution time on streaming kernels scales from 0.19 ms at 256 GB/s up to 1.30 ms at 16 GB/s (a 6.8x degradation).
+- In contrast, MCCA PIM execution remains completely flat at ~0.05 ms regardless of external bus bandwidth, because memory accesses never traverse the external pins, driving speedup up to ~25.5x–26.4x.
 
 ---
 
@@ -232,4 +232,4 @@ The following publication-grade figures were generated by the visualization suit
 
 ## 7. Conclusion
 
-This project successfully designed, modeled, and evaluated a **Memory-Centric Computing Architecture for Data-Local Execution and Intelligent Computation Placement**. By synergizing high-throughput conventional host cores with high-bandwidth near-bank PIM units under the control of an online cost-model dispatcher, the architecture eliminates unnecessary off-chip data movement. It delivers up to **14.68x speedup** and **92.8% energy savings** on memory-bound workloads, while retaining full host CPU performance on compute-bound kernels, demonstrating an optimal path forward for future post-von Neumann computing systems.
+This project successfully designed, modeled, and evaluated a **Memory-Centric Computing Architecture for Data-Local Execution and Intelligent Computation Placement**. By synergizing high-throughput conventional host cores with high-bandwidth near-bank PIM units under the control of an online cost-model dispatcher, the architecture eliminates unnecessary off-chip data movement. It delivers **7.97x to 12.63x speedup** under baseline interconnects (scaling up to **26.35x** under narrow bandwidth) and **up to 13.82x energy savings** (92.8% reduction on streaming, 11.37x / 91.2% on graph traversal) on memory-bound workloads, while retaining full host CPU performance on compute-bound kernels, demonstrating an optimal path forward for future post-von Neumann computing systems.

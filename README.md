@@ -15,7 +15,7 @@
 > **MemCentric-Sim: Memory-Centric Computing Simulator | Python, FastAPI, Architecture | § Aug 2026**
 > - **Designed a microarchitectural simulator** modeling a host CPU, 3-level set-associative caches (L1–L3, LRU), and multi-bank DRAM row-buffer timing ($t_{CAS}, t_{RCD}, t_{RP}$).
 > - **Implemented static and dynamic scheduling** that places tasks between the host CPU and near-memory units using runtime cache residency and bus contention to resolve memory-induced stalls.
-> - **Evaluated performance and Energy-Delay Product** on compute-dense and memory-bound workloads: **4.09×–26.35× speedup** and **up to 11.58× energy savings**, with **under 0.5% scheduling overhead**.
+> - **Evaluated performance and Energy-Delay Product** on compute-dense and memory-bound workloads: **7.97×–12.63× speedup** on memory-bound workloads (scaling up to **26.35×** under narrow interconnects; **6.61×** on mixed pipelines) and **up to 13.82× energy savings** (92.8% reduction), with **under 0.5% scheduling overhead**.
 
 ---
 
@@ -58,13 +58,13 @@
 | | `DYNAMIC_INTELLIGENT` | **0.10** | **7.97x** | **0.0** | **0.44** | **13.82x** | **44.0** | **0.08%** |
 | **Memory-Bound (Random Graph BFS)** | `ALWAYS_HOST` | 1.03 | 1.00x | 45.8 | 8.64 | Baseline | 8,899.2 | 0.00% |
 | | `ALWAYS_PIM` | **0.08** | **12.63x** | **1.0** | **0.76** | **11.37x** | **60.8** | 0.00% |
-| | `DYNAMIC_INTELLIGENT` | **0.08** | **12.63x** *(up to 26.35x)* | **1.0** | **0.76** | **up to 11.58x** | **60.8** | **0.05%** |
+| | `DYNAMIC_INTELLIGENT` | **0.08** | **12.63x** *(up to 26.35x)* | **1.0** | **0.76** | **11.37x** | **60.8** | **0.05%** |
 | **Mixed Pipeline** | `ALWAYS_HOST` | 0.77 | 1.00x | 30.7 | 5.94 | Baseline | 4,573.8 | 0.00% |
 | | `ALWAYS_PIM` | 0.41 | 1.87x | 3.6 | 1.12 | 5.30x | 459.2 | 0.00% |
 | | `DYNAMIC_INTELLIGENT` | **0.12** | **6.61x** | **1.1** | **0.73** | **8.14x** | **87.6** | **0.09%** |
 
-- **Speedup Range:** **4.09× to 26.35×** across memory-bound streaming and irregular graph pointer chasing (scaling up to 26.35× under narrow 16 GB/s interconnect bandwidth).
-- **Energy Savings:** **Up to 11.58×** reduction in off-chip energy consumption (slashing CXL bus traffic by up to 97.8%).
+- **Speedup Range:** **7.97× to 12.63×** across memory-bound streaming and irregular graph pointer chasing under standard interconnects (**6.61×** on mixed pipelines, scaling up to **26.35×** under narrow 16 GB/s interconnect bandwidth).
+- **Energy Savings:** **Up to 13.82×** reduction in off-chip energy consumption (slashing CXL bus traffic by up to 97.8%–100%).
 - **Scheduling Overhead:** Strictly **under 0.5%** across all real-world workload executions.
 
 ---

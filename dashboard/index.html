@@ -362,15 +362,15 @@
                                 <td>High (&gt; 64x)</td>
                                 <td>Tiled / Spatial</td>
                                 <td><span class="tag-host">Host CPU</span></td>
-                                <td>1.0x (PIM is 10x slower)</td>
+                                <td>1.00x (PIM is 11.0x slower)</td>
                             </tr>
                             <tr>
                                 <td><strong>2. Streaming Dataset (SAXPY Filter)</strong></td>
-                                <td>Low (0.25 - 0.5 FLOPs/B)</td>
+                                <td>Low (&gt; 0.25 - 0.5 FLOPs/B)</td>
                                 <td>Single-pass (1.0x)</td>
                                 <td>Sequential Stream</td>
                                 <td><span class="tag-pim">PIM Units</span></td>
-                                <td>6.66x (92.8% energy reduction)</td>
+                                <td>7.97x (92.8% energy reduction, 13.82x multiplier)</td>
                             </tr>
                             <tr>
                                 <td><strong>3. Randomly Accessed (Graph BFS)</strong></td>
@@ -378,7 +378,7 @@
                                 <td>Poor (&lt; 0.2x)</td>
                                 <td>Irregular Pointer Chasing</td>
                                 <td><span class="tag-pim">PIM Units</span></td>
-                                <td>14.68x (91.2% energy reduction)</td>
+                                <td>12.63x (up to 26.35x under narrow link; 91.2% energy reduction, 11.37x multiplier)</td>
                             </tr>
                             <tr>
                                 <td><strong>4. Heterogeneous Mixed Pipeline</strong></td>
@@ -386,7 +386,7 @@
                                 <td>Phase-dependent</td>
                                 <td>Multi-Phase</td>
                                 <td><span class="tag-hybrid">Dynamic Adaptive</span></td>
-                                <td>6.28x over Host (87.7% energy reduction)</td>
+                                <td>6.61x over Host (87.7% energy reduction, 8.14x multiplier)</td>
                             </tr>
                         </tbody>
                     </table>

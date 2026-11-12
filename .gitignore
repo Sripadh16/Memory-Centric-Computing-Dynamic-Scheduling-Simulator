@@ -55,6 +55,7 @@ $RECYCLE.BIN/
 *.tmp
 
 # Submission folders and archives (deliverables submitted separately)
+CS23I1018.*
 CA assignment/
 CA assignment.zip
 CA assigment/
