@@ -8,16 +8,6 @@
 [![DRAM](https://img.shields.io/badge/DRAM-Multi--Bank%20(tCAS%2C%20tRCD%2C%20tRP)-purple.svg)](file:///c:/Users/sripa/Desktop/CA%20project/simulator/memory.py)
 [![Tests](https://img.shields.io/badge/Unit%20Tests-7%2F7%20Passed-brightgreen.svg)](file:///c:/Users/sripa/Desktop/CA%20project/tests/test_sim.py)
 
----
-
-## 📌 Resume Alignment Specification
-
-> **MemCentric-Sim: Memory-Centric Computing Simulator | Python, FastAPI, Architecture | § Aug 2026**
-> - **Designed a microarchitectural simulator** modeling a host CPU, 3-level set-associative caches (L1–L3, LRU), and multi-bank DRAM row-buffer timing ($t_{CAS}, t_{RCD}, t_{RP}$).
-> - **Implemented static and dynamic scheduling** that places tasks between the host CPU and near-memory units using runtime cache residency and bus contention to resolve memory-induced stalls.
-> - **Evaluated performance and Energy-Delay Product** on compute-dense and memory-bound workloads: **7.97×–12.63× speedup** on memory-bound workloads (scaling up to **26.35×** under narrow interconnects; **6.61×** on mixed pipelines) and **up to 13.82× energy savings** (92.8% reduction), with **under 0.5% scheduling overhead**.
-
----
 
 ## 🏛️ Architectural Implementation
 
